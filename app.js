@@ -3,6 +3,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 require('dotenv').config();
 const app = express();
+const crypto = require('crypto');
+
 const port = 3000;
 
 app.use(express.json());
@@ -30,12 +32,15 @@ app.get('/quotes/random', async (req, res) => {
   try {
     // 随机获取一个语录
     const count = await Quote.countDocuments();
-    const randomIndex = Math.floor(Math.random() * count);
+    const randomBytes = crypto.randomBytes(4); // 生成 4 字节的随机字节序列
+    const randomIndex = Math.floor(
+      (randomBytes[0] / 255) * count
+    ); // 将随机字节序列转换为介于 0 和 count 之间的整数
     const quote = await Quote.findOne().skip(randomIndex);
     res.json(quote);
   } catch (error) {
-    console.log(error)
     res.status(500).json({ error: '服务器内部错误' });
+    console.log(error);
   }
 });
 
