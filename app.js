@@ -44,6 +44,22 @@ app.get('/quotes/random', async (req, res) => {
   }
 });
 
+app.post('/quotes/random', async (req, res) => {
+  try {
+    // 随机获取一个语录
+    const count = await Quote.countDocuments();
+    const randomBytes = crypto.randomBytes(4); // 生成 4 字节的随机字节序列
+    const randomIndex = Math.floor(
+      (randomBytes[0] / 255) * count
+    ); // 将随机字节序列转换为介于 0 和 count 之间的整数
+    const quote = await Quote.findOne().skip(randomIndex);
+    res.json(quote);
+  } catch (error) {
+    res.status(500).json({ error: '服务器内部错误' });
+    console.log(error);
+  }
+});
+
 app.post('/quote', async (req, res) => {
   try {
     // 创建新语录
